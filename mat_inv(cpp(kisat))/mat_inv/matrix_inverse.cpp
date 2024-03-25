@@ -1,0 +1,162 @@
+#include <iostream>
+using namespace std;
+
+//  -check memory-
+void checkMemory(double **y, int n){
+    y = new double*[n];
+    if(!y){
+        cout<<"Memory allocation failed.\n";
+        return ;
+    }
+    for(int i = 0; i < n; i++){
+        y[i] = new double[n];
+            if (!y[i])
+            {
+                cout<<"Memory allocation failed.\n";
+                return ;
+            }
+    }
+}
+//  -class matrix-
+class matrix
+{
+  int n;
+  double **x;
+  public:
+    matrix(int d);
+    ~matrix();
+    void    input();
+    double  **add(double **, int);
+    double  **product_NbMatrix(double);
+    double  **product_Matrices(double **, int);
+    double  **inverse();
+    int     **identity(int nb);
+    double  trace();
+};
+//  -constructor-
+matrix :: matrix(int d){
+    n = d;
+    checkMemory(x, n);
+    input();
+}
+//  -destructor-
+matrix :: ~matrix(){
+    for(int i = 0; i < n; i++)
+        delete[] x[i];
+    delete[] x;
+}
+//  -matrix input-
+void matrix :: input(){
+    int i, j;
+    for(i = 0; i < n; i++)
+        for (j = 0; j < n; j++){
+            cout<<"matrix["<<i<<"]["<<j<<"] = ";
+            cin>>x[i][j];
+        }
+}
+//  -matrix inverse-
+double ** matrix :: inverse(){
+    double  **x_1, **b, p = 0;
+    
+    checkMemory(x_1, n);
+    checkMemory(b, n);
+    for (int i = 1; i <= n; i++){
+        p = (1/i)*trace();
+        if (i != n)
+        {   
+            x_1 = (double **)identity(n);
+            int i, j;
+        for(i = 0; i < n; i++)
+            for(j = 0; j < n; j++)
+                x_1[i][j] *= (-1)*p;
+            b = add(x_1, n);
+            product_Matrices(b, n);
+        }
+    }
+    if (p != 0)
+    {   
+        int i, j;
+        for(i = 0; i < n; i++)
+            for(j = 0; j < n; j++)
+                x_1[i][j] = b[i][j] * (1/p);
+        return (x_1);
+    }
+    else
+        return ((double **)NULL);
+}
+//  -matrix trace-
+double matrix :: trace(){
+    double p = 0;
+    for (int i = 0; i < n; i++)
+        p += x[i][i];
+    return (p);
+}
+//  -matrix add-
+double ** matrix :: add(double **m, int d){
+    if (d != n)
+    {
+        cout<<"The matrices have different dimensions.\n";
+        return (NULL);
+    }
+    double **c;
+    int i, j;
+    
+    checkMemory(c, n);
+    for(i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            c[i][j] = x[i][j] + m[i][j];
+    return (c);
+}
+//  -product of a matrix and a number
+double ** matrix :: product_NbMatrix(double nb){
+    int i, j;
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            x[i][j] *= nb;
+    return (x);
+}
+//  -product of matrices
+double **matrix :: product_Matrices(double **m, int d){
+    if (d != n)
+    {
+        cout<<"The matrices have different dimensions.\n";
+        return (NULL);
+    }
+    int i, j, k;
+    double **p;
+    checkMemory(p, n);
+    for (i = 0; i < n; i++)
+    {
+        for (k = 0; k < n; k++)
+        {
+            p[i][k] = 0;
+            for (j = 0; j < n; j++)
+                p[i][k] += x[i][j] * m[j][k];
+        }
+    }
+    return (p);
+}
+//  -identity matrix-
+int ** matrix :: identity(int nb){
+    int **i_n;
+    checkMemory((double **)i_n, nb);
+    for(int i = 0; i < nb; i++)
+        i_n[i][i] = 1;
+    return (i_n);
+}
+int main()
+{
+    int n, i, j;
+    double **m;
+    cout<<"n = "; cin>>n;
+    matrix A(n);
+    checkMemory(m, n);
+    m = A.inverse();
+    for(i = 0; i < n; i++){
+        cout<<"inverse of matrix: \n A^(-1) = [\n";
+        for(j = 0; j < n; j++)
+            cout<<m[i][j]<<"    ";
+        cout<<"]\n";
+    }
+    return 0;
+}
